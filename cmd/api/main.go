@@ -4,6 +4,8 @@ import (
 	"log/slog"
 	"os"
 
+	"github.com/oscargh945/holiday-api/domain/entities"
+
 	holidayclient "github.com/oscargh945/holiday-api/infrastructure/client"
 	holidayrepository "github.com/oscargh945/holiday-api/infrastructure/repositories"
 
@@ -26,8 +28,50 @@ func main() {
 
 	holidays, err := apiClient.FetchHolidays()
 	if err != nil {
-		slog.Error("failed to load holidays", "error", err)
-		os.Exit(1)
+		slog.Warn("failed to load holidays from upstream services, using fallback data", "error", err)
+
+		holidays = []entities.Holiday{
+			{
+				Date:        "2024-01-01",
+				Title:       "Año Nuevo",
+				Phone:       "",
+				Type:        "Civil",
+				Inalienable: true,
+				Extra:       "Civil e Irrenunciable",
+			},
+			{
+				Date:        "2024-03-29",
+				Title:       "Viernes Santo",
+				Phone:       "",
+				Type:        "Religioso",
+				Inalienable: false,
+				Extra:       "Religioso",
+			},
+			{
+				Date:        "2024-05-01",
+				Title:       "Día Nacional del Trabajo",
+				Phone:       "",
+				Type:        "Civil",
+				Inalienable: true,
+				Extra:       "Civil e Irrenunciable",
+			},
+			{
+				Date:        "2024-09-18",
+				Title:       "Independencia Nacional",
+				Phone:       "",
+				Type:        "Civil",
+				Inalienable: true,
+				Extra:       "Civil e Irrenunciable",
+			},
+			{
+				Date:        "2024-12-25",
+				Title:       "Navidad",
+				Phone:       "",
+				Type:        "Religioso",
+				Inalienable: true,
+				Extra:       "Religioso e Irrenunciable",
+			},
+		}
 	}
 
 	slog.Info("holidays loaded successfully", "count", len(holidays))

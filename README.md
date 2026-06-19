@@ -45,3 +45,26 @@ La información de los feriados se obtiene desde este servicio:
 
 ```text
 https://api.victorsanmartin.com/feriados/en.json
+```
+
+
+## Nota 
+
+La aplicación intenta cargar los feriados desde la URL original del desafío:
+
+```text
+https://api.victorsanmartin.com/feriados/en.json
+```
+
+Pero el servicio respondía con error `403 Forbidden` y durante el desarrollo, esa URL redirigía a:
+
+```text
+https://api.boostr.cl/feriados/en.json
+```
+
+
+Entonces decidi agregar una estrategia de respaldo, la carga de feriados funciona así:
+
+1. Intenta cargar los feriados desde la URL original.
+2. Si hay redirección, intenta cargar desde la nueva URL.
+3. Si todos los servicios externos fallan, se registra un warning y se cargan datos de respaldo en memoria.

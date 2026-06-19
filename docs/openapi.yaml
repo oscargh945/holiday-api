@@ -1,74 +1,155 @@
 openapi: 3.0.3
+
 info:
-  title: Holiday API
+  title: API de Feriados
   version: 1.0.0
-  description: API for listing holidays with filters by type and date range.
+  description: >
+    API para consultar feriados con filtros por tipo y rango de fechas.
+    Los feriados se cargan una sola vez al iniciar la aplicación desde el
+    servicio externo y se almacenan en memoria. Las solicitudes no consultan
+    el servicio externo en cada invocación.
 
 servers:
   - url: http://localhost:8080
+    description: Servidor local de desarrollo
+
+tags:
+  - name: Feriados
+    description: Operaciones para consultar feriados
 
 paths:
   /api/v1/holidays:
     get:
-      summary: List holidays
-      description: Returns holidays loaded from the upstream service during application startup.
+      tags:
+        - Feriados
+      operationId: listarFeriados
+      summary: Listar feriados
+      description: >
+        Retorna los feriados cargados durante el inicio de la aplicación.
+        Permite filtrar por tipo de feriado y por rango de fechas.
+        El formato de respuesta puede seleccionarse mediante el header Accept:
+        application/json o application/xml.
       parameters:
         - name: type
           in: query
           required: false
+          description: Tipo de feriado a filtrar. Ejemplos válidos pueden ser Civil o Religioso.
           schema:
             type: string
           example: Civil
+
         - name: from
           in: query
           required: false
+          description: Fecha inicial del filtro en formato YYYY-MM-DD.
           schema:
             type: string
             format: date
           example: 2024-01-01
+
         - name: to
           in: query
           required: false
+          description: Fecha final del filtro en formato YYYY-MM-DD.
           schema:
             type: string
             format: date
           example: 2024-12-31
+
       responses:
         "200":
-          description: Holidays returned successfully
+          description: Feriados retornados correctamente
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/HolidayListResponse"
+                $ref: "#/components/schemas/RespuestaListaFeriados"
+              example:
+                holidays:
+                  - date: "2024-01-01"
+                    title: "Año Nuevo"
+                    phone: ""
+                    type: "Civil"
+                    inalienable: true
+                    extra: "Civil e Irrenunciable"
             application/xml:
               schema:
-                $ref: "#/components/schemas/HolidayListResponse"
+                $ref: "#/components/schemas/RespuestaListaFeriados"
+
         "400":
-          description: Invalid date format
+          description: Formato de fecha inválido
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RespuestaError"
+              example:
+                message: "formato de fecha inválido, se esperaba YYYY-MM-DD"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/RespuestaError"
+
+        "500":
+          description: Error interno del servidor
 
 components:
   schemas:
-    HolidayListResponse:
+    RespuestaListaFeriados:
       type: object
+      required:
+        - holidays
       properties:
         holidays:
           type: array
+          description: Lista de feriados encontrados según los filtros enviados.
           items:
-            $ref: "#/components/schemas/Holiday"
-    Holiday:
+            $ref: "#/components/schemas/Feriado"
+
+    Feriado:
       type: object
+      required:
+        - date
+        - title
+        - phone
+        - type
+        - inalienable
+        - extra
       properties:
         date:
           type: string
           format: date
+          description: Fecha del feriado.
+          example: "2024-01-01"
+
         title:
           type: string
+          description: Nombre o título del feriado.
+          example: "Año Nuevo"
+
         phone:
           type: string
-          description: Empty because the upstream service does not provide this field.
+          description: Campo incluido para cumplir el contrato solicitado. El servicio externo no provee este dato, por lo que se retorna vacío.
+          example: ""
+
         type:
           type: string
+          description: Tipo de feriado.
+          example: "Civil"
+
         inalienable:
           type: boolean
+          description: Indica si el feriado es irrenunciable.
+          example: true
+
         extra:
           type: string
+          description: Información adicional del feriado.
+          example: "Civil e Irrenunciable"
+
+    RespuestaError:
+      type: object
+      required:
+        - message
+      properties:
+        message:
+          type: string
+          description: Mensaje descriptivo del error.
+          example: "formato de fecha inválido, se esperaba YYYY-MM-DD"
