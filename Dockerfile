@@ -14,6 +14,7 @@ FROM alpine:latest
 WORKDIR /app
 
 COPY --from=builder /app/holiday-api .
+COPY --from=builder /app/docs ./docs
 
 EXPOSE 8080
 
