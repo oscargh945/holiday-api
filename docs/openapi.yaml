@@ -1,0 +1,74 @@
+openapi: 3.0.3
+info:
+  title: Holiday API
+  version: 1.0.0
+  description: API for listing holidays with filters by type and date range.
+
+servers:
+  - url: http://localhost:8080
+
+paths:
+  /api/v1/holidays:
+    get:
+      summary: List holidays
+      description: Returns holidays loaded from the upstream service during application startup.
+      parameters:
+        - name: type
+          in: query
+          required: false
+          schema:
+            type: string
+          example: Civil
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          example: 2024-01-01
+        - name: to
+          in: query
+          required: false
+          schema:
+            type: string
+            format: date
+          example: 2024-12-31
+      responses:
+        "200":
+          description: Holidays returned successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HolidayListResponse"
+            application/xml:
+              schema:
+                $ref: "#/components/schemas/HolidayListResponse"
+        "400":
+          description: Invalid date format
+
+components:
+  schemas:
+    HolidayListResponse:
+      type: object
+      properties:
+        holidays:
+          type: array
+          items:
+            $ref: "#/components/schemas/Holiday"
+    Holiday:
+      type: object
+      properties:
+        date:
+          type: string
+          format: date
+        title:
+          type: string
+        phone:
+          type: string
+          description: Empty because the upstream service does not provide this field.
+        type:
+          type: string
+        inalienable:
+          type: boolean
+        extra:
+          type: string
